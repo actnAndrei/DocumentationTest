@@ -1,0 +1,35 @@
+/****** Object:  StoredProcedure [dbo].[InsertError]    Script Date: 03/03/2021 15:58:19 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+-- =============================================
+-- Author:      Roger Lloyd
+-- Create Date: 09/05/2019
+-- Description: Insert error. Called by ErrorHandling Logic App
+-- =============================================
+ALTER PROCEDURE [dbo].[InsertError]
+(
+    -- Add the parameters for the stored procedure here
+  @DateInserted datetime,
+  @LogicAppName nvarchar(100),
+  @SendEmail bit,
+  @LogOnly bit,
+  @CreateRemedyTicket bit,
+  @IgnoreError bit,
+  @ErrorDescription nvarchar(4000),
+  @TemplateID nvarchar(50),
+  @EmailRecipients nvarchar(4000),
+  @StepName nvarchar(100)
+ )
+
+AS
+BEGIN
+    -- SET NOCOUNT ON added to prevent extra result sets from
+    -- interfering with SELECT statements.
+    SET NOCOUNT ON
+
+    INSERT INTO dbo.ErrorHandling(DateInserted,LogicAppName,SendEmail,LogOnly,CreateRemedyTicket,IgnoreError,ErrorDescription,TemplateID,EmailRecipients,StepName)
+	Values(@DateInserted,@LogicAppName,@SendEmail,@LogOnly,@CreateRemedyTicket,@IgnoreError,@ErrorDescription,@TemplateID,@EmailRecipients,@StepName)
+END

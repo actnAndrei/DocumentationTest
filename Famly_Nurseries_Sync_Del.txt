@@ -1,0 +1,118 @@
+{
+    "definition": {
+        "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+        "actions": {
+            "CATCH_AND_INSERT_ERROR": {
+                "inputs": {
+                    "body": {
+                        "CreateRemedyTicket": false,
+                        "DateInserted": "@{formatDateTime(convertFromUtc(utcNow(), 'GMT Standard Time'),'yyyy-MM-dd HH:mm:ss')}",
+                        "EmailRecipients": "none at the moment",
+                        "ErrorDescription": "@{body('FAMLY_NURSERIES_DEL_SPROC')}",
+                        "IgnoreError": false,
+                        "LogOnly": true,
+                        "LogicAppName": "@variables('LOGIC APP NAME')",
+                        "SendEmail": false,
+                        "StepName": "usp Lapp Famly Nurseries Del Sproc",
+                        "TemplateID": "SOMETHING"
+                    },
+                    "host": {
+                        "connection": {
+                            "name": "@parameters('$connections')['sql']['connectionId']"
+                        }
+                    },
+                    "method": "post",
+                    "path": "/v2/datasets/@{encodeURIComponent(encodeURIComponent('default'))},@{encodeURIComponent(encodeURIComponent('default'))}/procedures/@{encodeURIComponent(encodeURIComponent('[dbo].[InsertError]'))}"
+                },
+                "runAfter": {
+                    "FAMLY_NURSERIES_DEL_SPROC": [
+                        "Failed",
+                        "TimedOut"
+                    ]
+                },
+                "type": "ApiConnection"
+            },
+            "FAMLY_NURSERIES_DEL_SPROC": {
+                "inputs": {
+                    "body": {
+                        "Cost_Centre": "@triggerBody()?['Name']"
+                    },
+                    "host": {
+                        "connection": {
+                            "name": "@parameters('$connections')['sql_1']['connectionId']"
+                        }
+                    },
+                    "method": "post",
+                    "path": "/v2/datasets/@{encodeURIComponent(encodeURIComponent('default'))},@{encodeURIComponent(encodeURIComponent('default'))}/procedures/@{encodeURIComponent(encodeURIComponent('[dbo].[usp_Lapp_Famly_Nurseries_Del]'))}"
+                },
+                "runAfter": {
+                    "LOGIC_APP_NAME": [
+                        "Succeeded"
+                    ]
+                },
+                "type": "ApiConnection"
+            },
+            "LOGIC_APP_NAME": {
+                "inputs": {
+                    "variables": [
+                        {
+                            "name": "LOGIC APP NAME",
+                            "type": "string",
+                            "value": "Famly_Nurseries_Sync_Del"
+                        }
+                    ]
+                },
+                "runAfter": {},
+                "type": "InitializeVariable"
+            }
+        },
+        "contentVersion": "1.0.0.0",
+        "outputs": {},
+        "parameters": {
+            "$connections": {
+                "defaultValue": {},
+                "type": "Object"
+            }
+        },
+        "triggers": {
+            "When_an_item_is_deleted": {
+                "inputs": {
+                    "host": {
+                        "connection": {
+                            "name": "@parameters('$connections')['sharepointonline_2']['connectionId']"
+                        }
+                    },
+                    "method": "get",
+                    "path": "/datasets/@{encodeURIComponent(encodeURIComponent('https://actnforchildren.sharepoint.com/sites/FamlyStatements'))}/tables/@{encodeURIComponent(encodeURIComponent('06914a77-09de-4197-b5ba-5550b64d200e'))}/ondeleteditems"
+                },
+                "recurrence": {
+                    "frequency": "Hour",
+                    "interval": 2
+                },
+                "splitOn": "@triggerBody()?['value']",
+                "type": "ApiConnection"
+            }
+        }
+    },
+    "parameters": {
+        "$connections": {
+            "value": {
+                "sharepointonline_2": {
+                    "connectionId": "/subscriptions/1a1815ac-cae5-4667-8a61-0063f171d23c/resourceGroups/rg-Integration/providers/Microsoft.Web/connections/sharepointonline-4",
+                    "connectionName": "sharepointonline-4",
+                    "id": "/subscriptions/1a1815ac-cae5-4667-8a61-0063f171d23c/providers/Microsoft.Web/locations/northeurope/managedApis/sharepointonline"
+                },
+                "sql": {
+                    "connectionId": "/subscriptions/1a1815ac-cae5-4667-8a61-0063f171d23c/resourceGroups/rg-Integration/providers/Microsoft.Web/connections/sql-2",
+                    "connectionName": "sql-2",
+                    "id": "/subscriptions/1a1815ac-cae5-4667-8a61-0063f171d23c/providers/Microsoft.Web/locations/northeurope/managedApis/sql"
+                },
+                "sql_1": {
+                    "connectionId": "/subscriptions/1a1815ac-cae5-4667-8a61-0063f171d23c/resourceGroups/rg-Integration/providers/Microsoft.Web/connections/ODS_Live",
+                    "connectionName": "ODS_Live",
+                    "id": "/subscriptions/1a1815ac-cae5-4667-8a61-0063f171d23c/providers/Microsoft.Web/locations/northeurope/managedApis/sql"
+                }
+            }
+        }
+    }
+}

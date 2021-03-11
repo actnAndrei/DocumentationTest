@@ -1,0 +1,43 @@
+USE [ODS_Live]
+GO
+/****** Object:  StoredProcedure [dbo].[usp_Lapp_Famly_Nurseries_InsUpd]    Script Date: 03/03/2021 14:53:01 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+-- =============================================
+-- Author:		<Andrei Danu>
+-- Create date: <10/02/2021>
+-- Description:	<Update Famly table with Sharepoint Nurseries list>
+-- =============================================
+ALTER PROCEDURE [dbo].[usp_Lapp_Famly_Nurseries_InsUpd] 
+	-- Parameters for the stored procedure
+	@Cost_Centre nvarchar(255),
+	@Setting nvarchar(255),
+	@Nursery_Manager nvarchar(255),
+	@Email nvarchar(255),
+	@Telephone_no nvarchar(255)
+AS
+
+BEGIN TRY
+	DECLARE @Count int
+		-- Verify the Cost Centre from the list exists in the famly table
+	SELECT @Count = Count([Cost Centre]) FROM Famly_Nurseries WHERE [Cost Centre] = @Cost_Centre
+	IF @Count = 0
+		BEGIN
+			-- If the Cost Centre is new and does not exist in the famly table, insert
+		INSERT INTO Famly_Nurseries ([Cost Centre], Setting, [Nursery Manager], Email, [Telephone no])
+		VALUES (@Cost_Centre, @Setting, @Nursery_Manager, @Email, @Telephone_no)
+		END
+	ELSE
+			-- If the Cost Centre exists in the famly table, update the record
+		UPDATE Famly_Nurseries
+		SET [Cost Centre]=@Cost_Centre, Setting=@Setting, [Nursery Manager]=@Nursery_Manager, Email=@Email, [Telephone no]=@Telephone_no
+		WHERE [Cost Centre]=@Cost_Centre
+END TRY 
+BEGIN CATCH
+	DECLARE @ErrorMessage NVARCHAR(4000)
+	SELECT @ErrorMessage = 'Error at line '+ CAST(ERROR_LINE() AS VARCHAR)+ '. Message: ' + ERROR_MESSAGE()
+	RAISERROR (@ErrorMessage, 16, 1) WITH LOG 	
+END CATCH
